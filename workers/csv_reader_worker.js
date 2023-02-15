@@ -16,11 +16,12 @@ parentPort.on('message', filePath => {
             });
     });
 
+
     result
         .then(response => {
             parentPort.postMessage(response);
         })
-        .catch(error => console.log('worker.js error', error));
+        .catch(error => console.log('csv_reader_worker.js error', error));
 })
 
 

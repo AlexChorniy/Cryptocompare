@@ -1,39 +1,35 @@
 require('dotenv').config();
-// const axios = require("axios");
 const {Worker} = require('worker_threads');
 
-// const api = process.env.CRYPTO_API_KEY;
-
-// const getExchangeRate = async (from, to, date) => {
-//     const response = await axios
-//         .get(`${process.env.CRYPTO_COMPARE_URI}
-//             ?fsym=${from}
-//             &tsyms=${to}
-//             &ts=${date}
-//             &api_key=${process.env.CRYPTO_API_KEY}`);
-//     return response.data[from][to];
-// };
-
-
 const main = async () => {
-    // const arguments = process.argv.slice(2);
+    const arguments = process.argv.slice(2);
+    let data = [];
+    let readWorker = new Worker('./workers/csv_reader_worker.js');
 
-    let worker = new Worker('./worker.js');
-    worker.postMessage(process.env.DATA_FILE_PATH);
-    worker.on('message', data => console.log('worker', data));
+    readWorker.postMessage(process.env.DATA_FILE_PATH);
 
-    // const transactions = await readTransactions(process.env.DATA_FILE_PATH);
-    // const exchangeRate = await getExchangeRate('XRP', 'USD', 1571965722);
+    const t0 = performance.now();
 
-    // switch (arguments.length) {
-    //     case 0:
-    //         const latestDate = new Date().toISOString().split('T')[0];
-    //         return latestDate;
-    //     default:
-    //         return 'qwerty';
-    // }
+    readWorker.on('message', readData => {
+        data = [...readData];
+        if (data.length > 0) {
+            const t1 = performance.now();
+            console.log('performance', t1 - t0);
+        }
+    });
 
-    // console.log('main:', arguments);
+    // sleep module, waiting until worker returns data
+    await new Promise((resolve) => {
+        const interval = setInterval(() => {
+            if (data.length > 0) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 1000);
+    })
+
+    let calculateBalance = new Worker('./workers/calculate_balance_worker.js');
+    calculateBalance.postMessage({arguments, data});
 }
 
 main();
