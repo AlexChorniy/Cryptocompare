@@ -6,10 +6,14 @@ parentPort.on('message', async ({arguments, data}) => {
         case 0:
             const balance = data.reduce((acc, currentValue) => {
                 const {timestamp, transaction_type, token, amount} = currentValue;
+
                 if (isDeposit(transaction_type)) {
-                    return setIncrement(acc, amount, token);
+                    return setIncrement(acc, amount, token, timestamp);
+                } else if (isWithdrawal(transaction_type)) {
+                    return setDecrement(acc, amount, token, timestamp);
                 }
-                return setDecrement(acc, amount, token);
+
+                return acc;
             }, 0)
 
             console.log('Arguments amount: 0, your balance is', balance);
@@ -19,22 +23,31 @@ parentPort.on('message', async ({arguments, data}) => {
                 const {timestamp, transaction_type, token, amount} = currentValue;
                 const isToken = [...arguments[0]].length === 3;
 
-                if (isDeposit(transaction_type) && isToken && arguments[0] === token) {
-                    return setIncrement(acc, amount, token);
-                } else if (isWithdrawal(transaction_type) && isToken && arguments[0] === token) {
-                    return setDecrement(acc, amount, token);
+                if (
+                    isDeposit(transaction_type)
+                    && isToken
+                    && arguments[0] === token
+                ) {
+                    return setIncrement(acc, amount, token, timestamp);
+                } else if (
+                    isWithdrawal(transaction_type)
+                    && isToken
+                    && arguments[0] === token
+                ) {
+                    return setDecrement(acc, amount, token, timestamp);
                 } else if (
                     isDeposit(transaction_type)
                     && !isToken
                     && compareDates(arguments, timestamp)) {
-                    return setIncrement(acc, amount, token);
+                    return setIncrement(acc, amount, token, timestamp);
                 } else if (
                     isWithdrawal(transaction_type)
                     && !isToken
                     && compareDates(arguments, timestamp)
                 ) {
-                    return setDecrement(acc, amount, token);
+                    return setDecrement(acc, amount, token, timestamp);
                 }
+                
                 return acc;
             }, 0)
 
@@ -52,17 +65,18 @@ parentPort.on('message', async ({arguments, data}) => {
                     && currentToken === token
                     && compareDates(currentDate, timestamp)
                 ) {
-                    return setIncrement(acc, amount, token);
+                    return setIncrement(acc, amount, token, timestamp);
                 } else if (
                     isWithdrawal(transaction_type)
                     && currentToken === token
                     && compareDates(currentDate, timestamp)
                 ) {
-                    return setDecrement(acc, amount, token);
+                    return setDecrement(acc, amount, token, timestamp);
                 }
 
                 return acc;
             }, 0);
+
             console.log(`Arguments: ${currentToken}, ${currentDate}, your balance is`, balance3);
             break;
         default:
