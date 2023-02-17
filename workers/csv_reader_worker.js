@@ -9,7 +9,9 @@ parentPort.on('message', filePath => {
             .on('error', reject)
             .pipe(csv())
             .on('data', (data) => {
-                transactions.push(data);
+                if (Object.keys(data).length > 0) {
+                    transactions.push(data);
+                }
             })
             .on('end', () => {
                 resolve(transactions);

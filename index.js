@@ -1,5 +1,6 @@
 require('dotenv').config();
 const {Worker} = require('worker_threads');
+const {wait} = require("./helpers");
 
 const main = async () => {
     const arguments = process.argv.slice(2);
@@ -18,15 +19,7 @@ const main = async () => {
         }
     });
 
-    // sleep module, waiting until worker returns data
-    await new Promise((resolve) => {
-        const interval = setInterval(() => {
-            if (data.length > 0) {
-                clearInterval(interval);
-                resolve();
-            }
-        }, 1000);
-    })
+    await wait(() => data.length > 0);
 
     let calculateBalance = new Worker('./workers/calculate_balance_worker.js');
     calculateBalance.postMessage({arguments, data});

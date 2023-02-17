@@ -5,7 +5,7 @@
   "description": "command line program",
   "main": "index.js",
   "scripts": {
-    "start": "node --max_old_space_size=12288 index.js",
+    "start": "node --max_old_space_size=12288 index.js 1970-01-19 ETH",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
