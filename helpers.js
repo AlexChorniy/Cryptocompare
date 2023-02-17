@@ -1,3 +1,4 @@
+const {workWithAPI} = require("./api");
 const compareDates = (dateFromArgument, timestampDate) => {
     return new Date(`${dateFromArgument}`).toLocaleDateString() === new Date(+timestampDate).toLocaleDateString();
 }
@@ -23,7 +24,19 @@ const wait = (cb) => {
     })
 }
 
+const updateExchangeRateState = (
+    {from, to, date, setBalance}
+) => {
+    const exchangeRate = workWithAPI.getExchangeRate(from, to, date);
+    exchangeRate
+        .then((rate) => {
+            setBalance(rate);
+        })
+        .catch((error) => console.log('ERROR:isDeposit', error))
+}
+
 module.exports = {
+    updateExchangeRateState,
     compareDates,
     isDeposit,
     isWithdrawal,

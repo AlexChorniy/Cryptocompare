@@ -8,7 +8,6 @@ const workWithAPI = {
             try {
                 const response = await axios
                     .get(`${process.env.CRYPTO_COMPARE_URI}?fsym=${from}&tsyms=${to}&ts=${date}&api_key=${process.env.CRYPTO_API_KEY}`);
-                console.log('getExchangeRate', response.data);
                 resolve(response.data[from][to]);
             } catch (e) {
                 reject(e);
@@ -18,5 +17,5 @@ const workWithAPI = {
 }
 
 module.exports = {
-    workWithAPI
+    workWithAPI,
 }

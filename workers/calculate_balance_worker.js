@@ -1,35 +1,53 @@
 const {parentPort} = require('worker_threads');
-const {compareDates, isDeposit, isWithdrawal, setIncrement, setDecrement, wait} = require("../helpers");
-const {workWithAPI} = require("../api");
+const {
+    compareDates,
+    isDeposit,
+    isWithdrawal,
+    setIncrement,
+    setDecrement,
+    wait,
+    updateExchangeRateState,
+} = require("../helpers");
 
 parentPort.on('message', async ({arguments, data}) => {
     switch (arguments.length) {
         case 0:
             let balance = 0;
             let counter = 0;
+            let asyncCounter = 0;
 
             data.forEach((currentValue) => {
                 const {timestamp, transaction_type, token, amount} = currentValue;
                 if (isDeposit(transaction_type) && token && timestamp) {
-                    const exchangeRate = workWithAPI.getExchangeRate(token, 'USD', timestamp);
-                    exchangeRate
-                        .then((rate) => {
-                            balance = setIncrement(balance, amount, rate);
-                            counter++;
-                        })
-                        .catch((error) => console.log('ERROR:isDeposit', error))
+                    counter++;
+                    updateExchangeRateState(
+                        {
+                            from: token,
+                            to: 'USD',
+                            date: timestamp,
+                            setBalance: (rate) => {
+                                balance = setIncrement(balance, amount, rate);
+                                asyncCounter++
+                            },
+                        }
+                    )
                 } else if (isWithdrawal(transaction_type) && token && timestamp) {
-                    const exchangeRate = workWithAPI.getExchangeRate(token, 'USD', timestamp);
-                    exchangeRate
-                        .then((rate) => {
-                            balance = setDecrement(balance, amount, rate);
-                            counter++;
-                        })
-                        .catch((error) => console.log('ERROR:isWithdrawal', error))
+                    counter++;
+                    updateExchangeRateState(
+                        {
+                            from: token,
+                            to: 'USD',
+                            date: timestamp,
+                            setBalance: (rate) => {
+                                balance = setDecrement(balance, amount, rate);
+                                asyncCounter++
+                            },
+                        }
+                    )
                 }
             })
 
-            await wait(() => counter === data.length);
+            await wait(() => asyncCounter === counter);
 
             console.log('Arguments amount: 0, your balance is', balance);
             break;
@@ -44,40 +62,56 @@ parentPort.on('message', async ({arguments, data}) => {
 
                 if (isDeposit(transaction_type) && arguments[0] === token && timestamp) {
                     counterOne++
-                    const exchangeRate = workWithAPI.getExchangeRate(token, 'USD', timestamp);
-                    exchangeRate
-                        .then((rate) => {
-                            balanceOne = setIncrement(balanceOne, amount, rate);
-                            asyncCounterOne++;
-                        })
-                        .catch((error) => console.log('ERROR:isDeposit', error))
+                    updateExchangeRateState(
+                        {
+                            from: token,
+                            to: 'USD',
+                            date: timestamp,
+                            setBalance: (rate) => {
+                                balanceOne = setIncrement(balanceOne, amount, rate);
+                                asyncCounterOne++
+                            },
+                        }
+                    )
                 } else if (isWithdrawal(transaction_type) && arguments[0] === token && timestamp) {
                     counterOne++
-                    const exchangeRate = workWithAPI.getExchangeRate(token, 'USD', timestamp);
-                    exchangeRate
-                        .then((rate) => {
-                            balanceOne = setDecrement(balanceOne, amount, rate);
-                            asyncCounterOne++;
-                        })
-                        .catch((error) => console.log('ERROR:isDeposit', error))
+                    updateExchangeRateState(
+                        {
+                            from: token,
+                            to: 'USD',
+                            date: timestamp,
+                            setBalance: (rate) => {
+                                balanceOne = setDecrement(balanceOne, amount, rate);
+                                asyncCounterOne++
+                            },
+                        }
+                    )
                 } else if (isDeposit(transaction_type) && !isToken && compareDates(arguments, timestamp) && token && timestamp) {
                     counterOne++
-                    const exchangeRate = workWithAPI.getExchangeRate(token, 'USD', timestamp);
-                    exchangeRate
-                        .then((rate) => {
-                            balanceOne = setIncrement(balanceOne, amount, rate);
-                            asyncCounterOne++;
-                        })
-                        .catch((error) => console.log('ERROR:isDeposit', error))
+                    updateExchangeRateState(
+                        {
+                            from: token,
+                            to: 'USD',
+                            date: timestamp,
+                            setBalance: (rate) => {
+                                balanceOne = setIncrement(balanceOne, amount, rate);
+                                asyncCounterOne++
+                            },
+                        }
+                    )
                 } else if (isWithdrawal(transaction_type) && !isToken && compareDates(arguments, timestamp) && token && timestamp) {
                     counterOne++
-                    const exchangeRate = workWithAPI.getExchangeRate(token, 'USD', timestamp);
-                    exchangeRate
-                        .then((rate) => {
-                            balanceOne = setDecrement(balanceOne, amount, rate);
-                            asyncCounterOne++;
-                        })
-                        .catch((error) => console.log('ERROR:isDeposit', error))
+                    updateExchangeRateState(
+                        {
+                            from: token,
+                            to: 'USD',
+                            date: timestamp,
+                            setBalance: (rate) => {
+                                balanceOne = setDecrement(balanceOne, amount, rate);
+                                asyncCounterOne++
+                            },
+                        }
+                    )
                 }
             })
 
@@ -96,22 +130,30 @@ parentPort.on('message', async ({arguments, data}) => {
                 const {timestamp, transaction_type, token, amount} = currentValue;
                 if (isDeposit(transaction_type) && currentToken === token && compareDates(currentDate, timestamp) && token && timestamp) {
                     counterTwo++
-                    const exchangeRate = workWithAPI.getExchangeRate(token, 'USD', timestamp);
-                    exchangeRate
-                        .then((rate) => {
-                            balanceTwo = setIncrement(balanceTwo, amount, rate);
-                            asyncCounterTwo++;
-                        })
-                        .catch((error) => console.log('ERROR:isDeposit', error))
+                    updateExchangeRateState(
+                        {
+                            from: token,
+                            to: 'USD',
+                            date: timestamp,
+                            setBalance: (rate) => {
+                                balanceTwo = setIncrement(balanceTwo, amount, rate);
+                                asyncCounterTwo++
+                            },
+                        }
+                    )
                 } else if (isWithdrawal(transaction_type) && currentToken === token && compareDates(currentDate, timestamp) && token && timestamp) {
                     counterTwo++
-                    const exchangeRate = workWithAPI.getExchangeRate(token, 'USD', timestamp);
-                    exchangeRate
-                        .then((rate) => {
-                            balanceTwo = setDecrement(balanceTwo, amount, rate);
-                            asyncCounterTwo++;
-                        })
-                        .catch((error) => console.log('ERROR:isDeposit', error))
+                    updateExchangeRateState(
+                        {
+                            from: token,
+                            to: 'USD',
+                            date: timestamp,
+                            setBalance: (rate) => {
+                                balanceTwo = setDecrement(balanceTwo, amount, rate);
+                                asyncCounterTwo++
+                            },
+                        }
+                    )
                 }
             })
 
