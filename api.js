@@ -1,6 +1,5 @@
 const axios = require("axios");
 
-
 const workWithAPI = {
     getExchangeRate(from, to, date) {
         // We need Promise here because cryptocompare has limit of free calls
@@ -13,7 +12,16 @@ const workWithAPI = {
                 reject(e);
             }
         }, 600));
-    }
+    },
+    exchangeRateRequest({from, to, date, setBalance}) {
+        const exchangeRate = workWithAPI.getExchangeRate(from, to, date);
+        exchangeRate
+            .then((rate) => {
+                console.log('exchangeRateRequest', rate);
+                setBalance(rate);
+            })
+            .catch((error) => console.log('ERROR:isDeposit', error))
+    },
 }
 
 module.exports = {
