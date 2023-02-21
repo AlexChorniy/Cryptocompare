@@ -10,7 +10,6 @@ const {
 } = require("../helpers");
 
 parentPort.on('message', async ({arguments, data}) => {
-    const t2 = performance.now();
     switch (arguments.length) {
         case 0:
             let balance = 0;
@@ -45,7 +44,7 @@ parentPort.on('message', async ({arguments, data}) => {
 
             await wait(() => asyncCounter === counter);
 
-            console.log('Arguments amount: 0, your balance is', balance);
+            parentPort.postMessage(balance);
             break;
         case 1:
             let balanceOne = 0;
@@ -101,7 +100,7 @@ parentPort.on('message', async ({arguments, data}) => {
 
             await wait(() => counterOne === asyncCounterOne);
 
-            console.log(`'Arguments amount: 1. Argument: ${arguments[0]}`, balanceOne);
+            parentPort.postMessage(balanceOne);
             break;
         case 2:
             const currentToken = arguments.filter(arg => [...`${arg}`].length === 3)[0];
@@ -137,11 +136,10 @@ parentPort.on('message', async ({arguments, data}) => {
 
             await wait(() => counterTwo === asyncCounterTwo);
 
-            console.log(`Arguments: ${currentToken}, ${currentDate}, your balance is`, balanceTwo);
+            parentPort.postMessage(balanceTwo);
             break;
         default:
             console.log('ERROR: it\'s out of the question\'s task');
     }
-    const t3 = performance.now();
-    console.log('performance', t3 - t2);
+
 })
